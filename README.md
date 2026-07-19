@@ -1,121 +1,84 @@
 # chrismus50 — 50th Anniversary Memory Collection
 
+**Live site: https://redoudou.github.io/chrismus50/** — share this link with
+family. Nothing else is needed on their side: no account, no login, no app.
+
 A private, one-page website (in French) where friends and family contribute to
 Chris & Mus's 50th wedding anniversary (September 12, 2026, Paris) in any
 combination of three ways — photos, a written memory, and a video message
-recorded right in the browser. No accounts, no logins, no app to install —
-visitors open the link, add their name, contribute what they like, and tap
-**Envoyer**. Everything sent together is stored as one submission.
+recorded right in the browser. Everything sent together counts as one
+contribution, confirmed by a single thank-you message.
 
-## How it's put together
+## How it works (deployed and verified)
 
-- **[index.html](index.html)** — the whole site, hosted on **GitHub Pages**.
-- **[apps-script/Code.gs](apps-script/Code.gs)** — the backend, a **Google
-  Apps Script web app** running under your Google account. The page sends
-  submissions to it with `fetch`; it stores photos/videos in your Drive folder
-  and logs each submission in a Google Sheet. No servers, no hosting bills.
-- **Runs in a dedicated Google account** created just for the anniversary.
-  The one-time authorization grants the script access to that account's Drive —
-  which contains nothing but this collection, so the permission is effectively
-  scoped to the project. It creates its storage folder automatically on the
-  first submission.
-- Storage is organized **by type**, so everything is ready to use afterwards —
-  one folder to select all photos for a slideshow, one folder that is already a
-  playlist of video messages, one Sheet with every written memory:
+```
+Family's phone/computer
+        │  (the web page, hosted free on GitHub Pages)
+        ▼
+Google Apps Script web app  ("chrismus50vf", runs as the dedicated account)
+        │
+        ▼
+Google Drive folder "chrismus50"   ← owned by redoudou@gmail.com
+├── 📷 Photos/                       Prénom — 1.jpg, Prénom — 2.jpg …
+├── 🎥 Vidéos/                       Message de Prénom.mp4 …
+├── 📒 Journal des contributions     Sheet: date, prénom, message, nb photos, vidéo
+└── _technique — ne pas toucher/     in-flight video pieces, auto-cleaned
+```
 
-  ```
-  Souvenirs — 50 ans Chris & Mus/
-  ├── 📷 Photos/                      Leïla — 1.jpg, Leïla — 2.jpg, Karim — 1.jpg…
-  ├── 🎥 Vidéos/                      Message de Leïla.mp4, Message de Karim.mp4…
-  ├── 📒 Journal des contributions    (Sheet: date, prénom, message, counts)
-  └── _technique — ne pas toucher/    in-flight video chunks, auto-cleaned
-  ```
+- **[index.html](index.html)** — the entire site. The backend URL is set in
+  `APPS_SCRIPT_URL` near the top of its script section.
+- **[apps-script/Code.gs](apps-script/Code.gs)** + **[appsscript.json](apps-script/appsscript.json)**
+  — reference copy of the deployed backend.
+- Photos/videos are stored under the dedicated account's quota (15 GB, empty
+  otherwise) but live inside the `chrismus50` folder in redoudou's Drive,
+  which is shared **Restricted** — only the two accounts can see it.
 
-  Filenames carry the contributor's name, so sorting by name groups each
-  person's photos together. Everything is created automatically on the first
-  submission.
+## Accounts & access
 
-## Backend setup (about 5 minutes, one time)
+| Thing | Where | Access |
+|---|---|---|
+| Live site | https://redoudou.github.io/chrismus50/ | public link (noindex) |
+| GitHub repo | https://github.com/Redoudou/chrismus50 | owner: Redoudou |
+| Backend script `chrismus50vf` | Apps Script, dedicated account | owner: hellokader…, editor: redoudou |
+| Drive folder `chrismus50` | redoudou's My Drive | owner: redoudou, editor: hellokader…, Restricted |
 
-0. Create the dedicated free Google account (e.g. `chrismus50.famille@gmail.com`)
-   at [accounts.google.com/signup](https://accounts.google.com/signup) — 5 minutes,
-   no phone number usually required.
-1. While signed in to **that** account, open **[script.new](https://script.new)** —
-   this creates a blank Apps Script project.
-2. Name the project (click *"Untitled project"* at the top): `chrismus50`.
-3. In the editor, select everything in the `Code.gs` file and replace it with
-   the contents of [apps-script/Code.gs](apps-script/Code.gs). Save (⌘S).
-4. Open **Project Settings** (gear icon) → check **"Show 'appsscript.json'
-   manifest file in editor"** → back in the editor, open `appsscript.json` and
-   replace its contents with
-   [apps-script/appsscript.json](apps-script/appsscript.json). Save. (This
-   presets the Paris timezone and the web-app access settings so the deploy
-   dialog can't be misconfigured.)
-5. Click **Deploy → New deployment**. Click the gear next to *Select type* and
-   choose **Web app**. Confirm:
-   - **Execute as:** `Me`
-   - **Who has access:** `Anyone`  ← important: this is what lets family
-     contribute *without* signing in to Google.
-6. Click **Deploy**, then **Authorize access** and approve (Google shows a
-   "unverified app" warning — click *Advanced → Go to chrismus50 (unsafe) →
-   Allow*; the access covers only the dedicated account's Drive).
-7. Copy the **Web app URL** (ends in `/exec`).
-8. Paste that URL into `index.html`, in the line near the top of the script:
-   `var APPS_SCRIPT_URL = '';` → `var APPS_SCRIPT_URL = 'https://script.google.com/…/exec';`
-9. Commit and push — GitHub Pages redeploys automatically in a minute.
+Direct links to the backend (they force the right account, avoiding Google's
+"unable to open the file" multi-account error):
 
-Until step 8 is done, the live site shows a friendly "en préparation" notice
-and the submit button is disabled, so nobody can send memories into the void.
+- as owner: `https://script.google.com/home/projects/1bDTne3afjv6z5wAqRrtK-CM6xTy8mbBnOjWWcpyTATAYtL7Dmfdeo2sa/edit?authuser=hellokaderkaderalgerie@gmail.com`
+- as editor: same URL with `?authuser=redoudou@gmail.com`
 
-### Try it first
+## Changing the site (wording, dates, names)
 
-Open the site, submit a test photo/memory/video, and check that the subfolder
-and log sheet appeared in your Drive. Delete the test row/folder if you like.
+All visitor-facing text lives in `index.html` in plain HTML — the welcome
+message, the year badge (`1976 · 2026`), field labels, thank-you message.
+Edit, commit, push: GitHub Pages republishes automatically in about a minute.
+The backend does not need touching for text changes.
 
-## How access works
-
-The deployed Apps Script runs *as the dedicated account* (that's the one-time
-authorization at deploy). Contributors never need — and never get — any Drive
-access; the only link you share with family is the website URL. To see the
-collection from your everyday account, share the "Souvenirs" folder from the
-dedicated account with it (right-click → Share) after the first submission.
-
-## Customizing the wording
-
-All visitor-facing text lives in `index.html` in plain HTML near the top —
-the welcome message ("Nous préparons une surprise…"), the year badge
-(`1976 · 2026`), field labels, and the thank-you message. Edit freely;
-no code knowledge needed. Push to publish.
-
-**To update the backend** after editing `Code.gs`: in the Apps Script editor,
-**Deploy → Manage deployments → ✏️ (edit) → Version: New version → Deploy**.
-The URL stays the same.
+**Changing the backend** (rare): edit the code in the Apps Script editor
+(either account), then **Deploy → Manage deployments → ✏️ → Version: New
+version → Deploy**. The URL stays the same. Never create a *new* deployment —
+that would mint a different URL and run as whoever created it.
 
 ## Good to know
 
-- **Reliability:** photos upload one at a time with automatic retries. If a
-  connection drops mid-submission, the visitor just taps Send again — content
-  that already went through is not re-sent, and everything stays in one folder.
-  The log row is written once, after everything is safely stored.
-- **Limits:** up to 20 photos per submission, 25 MB per photo (plenty for phone
-  photos, including iPhone HEIC). Video recordings auto-stop at 2 minutes; a
-  video picked from the device can be up to 50 MB. Any combination works —
-  including a written memory alone, or a video alone.
-- **Video recording:** uses the browser's built-in recorder (works on iPhone/
-  Android/desktop in current browsers; the visitor grants camera & mic access
-  when they tap record). They can preview, re-record, or remove the video
-  before sending. If the camera is unavailable or access is declined, the page
-  offers picking an existing video instead. Videos upload in ~3 MB chunks with
-  retries — the server reassembles them into a single file in the submission
-  folder, so large videos survive shaky connections.
-- **Privacy:** the page asks search engines not to index it (`noindex`), and
-  only people with the link will realistically find it. Photos are visible
-  only to your Google account.
-- **Free quota:** Google allows plenty of daily uploads for a family project;
-  hundreds of photos a day is not a problem.
+- **Reliability:** uploads go one item at a time with automatic retries; a
+  dropped connection never loses what was already sent, never duplicates
+  anything, and the log row is written once, at the end. Double-clicking
+  Send cannot create duplicate submissions.
+- **Limits:** 20 photos per submission, 25 MB per photo (iPhone HEIC fine).
+  Video recording auto-stops at 2 minutes; picked video files up to 50 MB.
+  Any combination works — a written memory alone is welcome.
+- **Video recording:** browser-native (iPhone/Android/desktop). Visitors can
+  preview, re-record, or remove before sending; if the camera is refused, the
+  page offers picking an existing video. Videos travel in ~3 MB pieces and are
+  reassembled server-side.
+- **Free quota:** hundreds of photos a day fit comfortably in Google's free
+  limits.
 
 ## Previewing locally
 
-Open `index.html` in any browser (double-click the file). Without the backend
-it runs in preview mode: submissions pretend to succeed so you can feel the
-whole flow (form → progress → thank-you) before deploying.
+Open `index.html` from disk (or any localhost server) — without touching
+`APPS_SCRIPT_URL` it detects local use and runs in preview mode where
+submissions pretend to succeed, letting you rehearse the whole flow without
+writing anything to Drive. The live site always uses the real backend.
