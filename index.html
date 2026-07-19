@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Chris &amp; Mus — Noces d'or</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💛</text></svg>">
+<!-- chrismus50 — the page visitors see. Hosted on GitHub Pages; submissions go
+     to the Google Apps Script backend set in APPS_SCRIPT_URL below.
+     All wording lives in the markup (welcome text, labels, thank-you). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --cream: #faf6ee;
+    --card: #fffdf8;
+    --ink: #3d3428;
+    --ink-soft: #7a6f5d;
+    --gold: #b08d3e;
+    --gold-deep: #96742c;
+    --gold-pale: #f1e6cd;
+    --line: #e7ddc9;
+    --error: #a33b2e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Source Sans 3', -apple-system, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    background-image: radial-gradient(circle at 20% 0%, #fdf9f0 0%, var(--cream) 60%);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    line-height: 1.55;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px 28px 32px;
+    box-shadow: 0 12px 40px rgba(114, 92, 50, 0.10);
+  }
+  .fifty {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    text-align: center;
+    font-size: 15px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    text-align: center;
+    font-size: clamp(30px, 6vw, 40px);
+    margin-bottom: 4px;
+  }
+  .rule {
+    width: 64px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 14px auto 18px;
+  }
+  .intro {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+  .intro strong { color: var(--ink); }
+  .shh { font-style: italic; font-size: 14px; margin-top: 8px; }
+
+  label.field-label {
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    margin: 20px 0 6px;
+  }
+  label .optional { font-weight: 400; color: var(--ink-soft); font-size: 13px; }
+  input[type="text"], textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(176, 141, 62, 0.15);
+  }
+  textarea { min-height: 96px; resize: vertical; }
+
+  .dropzone {
+    border: 2px dashed #d8c9a5;
+    border-radius: 12px;
+    background: #fdfaf2;
+    padding: 26px 16px;
+    text-align: center;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--gold); background: var(--gold-pale); }
+  .dropzone .dz-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+  .dropzone .dz-main { color: var(--ink); font-weight: 600; }
+  .dropzone .dz-sub { font-size: 13px; margin-top: 2px; }
+  #fileInput { display: none; }
+
+  .thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--gold-pale);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb .no-preview {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; font-size: 24px;
+  }
+  .thumb button {
+    position: absolute; top: 4px; right: 4px;
+    width: 24px; height: 24px;
+    border: none; border-radius: 50%;
+    background: rgba(61, 52, 40, 0.75);
+    color: #fff; font-size: 13px; line-height: 1;
+    cursor: pointer;
+  }
+
+  /* video message */
+  .video-idle { text-align: center; }
+  .video-btn {
+    width: 100%;
+    padding: 16px 14px;
+    font: inherit; font-size: 16px; font-weight: 600;
+    color: var(--gold-deep);
+    background: #fdfaf2;
+    border: 2px dashed #d8c9a5;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .video-btn:hover { border-color: var(--gold); background: var(--gold-pale); }
+  .video-sub { font-size: 13px; color: var(--ink-soft); margin-top: 7px; }
+  .video-sub a { color: var(--gold-deep); }
+  #videoFileInput { display: none; }
+  .video-box video {
+    width: 100%; max-height: 320px;
+    background: #1c1813;
+    border-radius: 12px;
+    display: block;
+  }
+  .video-controls {
+    display: flex; gap: 10px; align-items: center; justify-content: center;
+    margin-top: 10px; flex-wrap: wrap;
+  }
+  .rec-timer { color: #c0392b; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ghost-btn {
+    padding: 9px 18px;
+    font: inherit; font-size: 15px; font-weight: 600;
+    color: var(--gold-deep);
+    background: none;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .stop-btn {
+    padding: 9px 18px;
+    font: inherit; font-size: 15px; font-weight: 600;
+    color: #fff;
+    background: #c0392b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  [hidden] { display: none !important; }
+  .submit-btn {
+    display: block;
+    width: 100%;
+    margin-top: 26px;
+    padding: 15px;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(180deg, #c19c48, var(--gold-deep));
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(150, 116, 44, 0.25);
+  }
+  .submit-btn:hover { filter: brightness(1.05); }
+  .submit-btn:disabled { opacity: .55; cursor: default; }
+
+  .note { text-align: center; font-size: 13px; color: var(--ink-soft); margin-top: 12px; }
+
+  .error-box {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fbeeec;
+    border: 1px solid #ecc8c2;
+    color: var(--error);
+    font-size: 14px;
+  }
+
+  /* progress + thank-you views */
+  .view { display: none; text-align: center; padding: 24px 0 8px; }
+  .progress-track {
+    height: 8px;
+    background: var(--gold-pale);
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 20px 0 12px;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #c19c48, var(--gold-deep));
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  #progressLabel { color: var(--ink-soft); font-size: 15px; }
+  .thanks-heart { font-size: 40px; margin-bottom: 10px; }
+  .view h2 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .view p { color: var(--ink-soft); font-size: 16px; }
+  .again-btn {
+    margin-top: 22px;
+    padding: 10px 22px;
+    font: inherit; font-size: 15px; font-weight: 600;
+    color: var(--gold-deep);
+    background: none;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ============ FORM VIEW ============ -->
+  <div id="formView">
+    <div class="fifty">1976 &nbsp;&middot;&nbsp; 2026</div>
+    <h1>Chris &amp; Mus</h1>
+    <div class="rule"></div>
+    <p class="intro">
+      Nous préparons une <strong>surprise</strong> pour les 50 ans de mariage de
+      Christiane et Mustapha. Partagez une ou deux photos et un souvenir qui vous
+      est cher — cela ne prend qu'une minute.
+      <span class="shh">Rendez-vous le 12 septembre 2026 à Paris&hellip;
+      et surtout, chut, c'est un secret&nbsp;! 🤫</span>
+    </p>
+
+    <label class="field-label" for="nameInput">Votre prénom</label>
+    <input type="text" id="nameInput" autocomplete="name" placeholder="Pour savoir qui nous écrit">
+
+    <label class="field-label">Vos photos</label>
+    <div class="dropzone" id="dropzone">
+      <span class="dz-icon">📷</span>
+      <span class="dz-main">Touchez ici pour ajouter des photos</span>
+      <div class="dz-sub">ou glissez-déposez vos photos</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
+
+    <label class="field-label" for="messageInput">Un souvenir ou un petit mot <span class="optional">(facultatif)</span></label>
+    <textarea id="messageInput" placeholder="Un souvenir, une anecdote amusante, quelques mots pour Chris & Mus…"></textarea>
+
+    <label class="field-label">Un message vidéo <span class="optional">(facultatif)</span></label>
+
+    <div class="video-idle" id="videoIdle">
+      <button type="button" class="video-btn" id="recordBtn">🎥 Enregistrer une vidéo</button>
+      <div class="video-sub">Comme un message sur un répondeur — 2 minutes maximum.<br>
+        <a href="#" id="pickVideoLink">Ou choisissez une vidéo déjà enregistrée</a></div>
+      <input type="file" id="videoFileInput" accept="video/*">
+    </div>
+
+    <div class="video-box" id="videoLive" hidden>
+      <video id="liveVideo" autoplay muted playsinline></video>
+      <div class="video-controls">
+        <span class="rec-timer" id="recTimer">● 0:00</span>
+        <button type="button" class="stop-btn" id="stopRecBtn">Terminer</button>
+        <button type="button" class="ghost-btn" id="cancelRecBtn">Annuler</button>
+      </div>
+    </div>
+
+    <div class="video-box" id="videoDone" hidden>
+      <video id="doneVideo" controls playsinline></video>
+      <div class="video-controls">
+        <button type="button" class="ghost-btn" id="reRecordBtn">Recommencer</button>
+        <button type="button" class="ghost-btn" id="removeVideoBtn">Retirer la vidéo</button>
+      </div>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <button class="submit-btn" id="submitBtn">Envoyer avec amour ♥</button>
+    <p class="note">Vos photos rejoignent directement notre collection familiale — rien n'est publié.</p>
+  </div>
+
+  <!-- ============ UPLOADING VIEW ============ -->
+  <div class="view" id="progressView">
+    <h2>Envoi de vos souvenirs&hellip;</h2>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <p id="progressLabel">Préparation&hellip;</p>
+    <p style="font-size:13px; margin-top:14px;">Merci de garder cette page ouverte un instant.</p>
+  </div>
+
+  <!-- ============ THANK YOU VIEW ============ -->
+  <div class="view" id="thanksView">
+    <div class="thanks-heart">💛</div>
+    <h2>Merci<span id="thanksName"></span>&nbsp;!</h2>
+    <p>Vos souvenirs sont précieusement gardés pour la grande surprise.<br>
+       Chris &amp; Mus vont adorer.</p>
+    <button class="again-btn" id="againBtn">Partager d'autres souvenirs</button>
+  </div>
+
+</div>
+
+<script>
+  // URL of the deployed Google Apps Script web app (backend).
+  // Until this is filled in, the live site shows a "coming soon" notice;
+  // opening the file locally (file://) runs in preview mode with fake success.
+  var APPS_SCRIPT_URL = ''; // set to the deployed /exec URL to open submissions
+
+  var MAX_FILE_MB = 25;
+  var MAX_FILES = 20;
+  var MAX_VIDEO_MB = 50;          // for videos picked from the device
+  var MAX_VIDEO_SECONDS = 120;    // recording auto-stops here
+  var CHUNK_CHARS = 4194304;      // ~3 MB of video per upload call (must be a multiple of 4)
+
+  var picked = [];   // { file, key, uploaded }
+  var els = {
+    formView: document.getElementById('formView'),
+    progressView: document.getElementById('progressView'),
+    thanksView: document.getElementById('thanksView'),
+    name: document.getElementById('nameInput'),
+    message: document.getElementById('messageInput'),
+    dropzone: document.getElementById('dropzone'),
+    fileInput: document.getElementById('fileInput'),
+    thumbs: document.getElementById('thumbs'),
+    submit: document.getElementById('submitBtn'),
+    errorBox: document.getElementById('errorBox'),
+    fill: document.getElementById('progressFill'),
+    progressLabel: document.getElementById('progressLabel'),
+    thanksName: document.getElementById('thanksName'),
+    again: document.getElementById('againBtn'),
+    videoIdle: document.getElementById('videoIdle'),
+    videoLive: document.getElementById('videoLive'),
+    videoDone: document.getElementById('videoDone'),
+    liveVideo: document.getElementById('liveVideo'),
+    doneVideo: document.getElementById('doneVideo'),
+    recTimer: document.getElementById('recTimer'),
+    recordBtn: document.getElementById('recordBtn'),
+    stopRecBtn: document.getElementById('stopRecBtn'),
+    cancelRecBtn: document.getElementById('cancelRecBtn'),
+    reRecordBtn: document.getElementById('reRecordBtn'),
+    removeVideoBtn: document.getElementById('removeVideoBtn'),
+    pickVideoLink: document.getElementById('pickVideoLink'),
+    videoFileInput: document.getElementById('videoFileInput')
+  };
+
+  /* ---- file picking ---- */
+  els.dropzone.addEventListener('click', function () { els.fileInput.click(); });
+  els.fileInput.addEventListener('change', function () {
+    addFiles(els.fileInput.files);
+    els.fileInput.value = '';
+  });
+  ['dragover', 'dragenter'].forEach(function (ev) {
+    els.dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      els.dropzone.classList.add('drag');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    els.dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      els.dropzone.classList.remove('drag');
+      if (ev === 'drop') addFiles(e.dataTransfer.files);
+    });
+  });
+
+  function addFiles(fileList) {
+    var errors = [];
+    Array.prototype.forEach.call(fileList, function (file) {
+      if (picked.length >= MAX_FILES) return;
+      var key = file.name + '|' + file.size;
+      if (picked.some(function (p) { return p.key === key; })) return; // no duplicates
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        errors.push('« ' + file.name + ' » dépasse ' + MAX_FILE_MB + ' Mo — pouvez-vous envoyer une version plus légère ?');
+        return;
+      }
+      picked.push({ file: file, key: key, uploaded: false });
+    });
+    renderThumbs();
+    showError(errors.join(' '));
+  }
+
+  function renderThumbs() {
+    els.thumbs.innerHTML = '';
+    picked.forEach(function (p, i) {
+      var div = document.createElement('div');
+      div.className = 'thumb';
+      var img = document.createElement('img');
+      img.alt = p.file.name;
+      img.onerror = function () { // e.g. HEIC on browsers that can't preview it
+        div.innerHTML = '<div class="no-preview">🖼️</div>';
+        div.appendChild(removeBtn(i));
+      };
+      img.src = URL.createObjectURL(p.file);
+      div.appendChild(img);
+      div.appendChild(removeBtn(i));
+      els.thumbs.appendChild(div);
+    });
+  }
+
+  function removeBtn(i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '✕';
+    b.setAttribute('aria-label', 'Retirer la photo');
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      picked.splice(i, 1);
+      renderThumbs();
+    });
+    return b;
+  }
+
+  function showError(msg) {
+    els.errorBox.textContent = msg || '';
+    els.errorBox.style.display = msg ? 'block' : 'none';
+  }
+
+  /* ---- video message ---- */
+  var videoState = { blob: null, mimeType: '', uploaded: false };
+  var recorder = null, recStream = null, recChunks = [], recTimerInt = null, recStart = 0;
+
+  els.recordBtn.addEventListener('click', startRecording);
+  els.reRecordBtn.addEventListener('click', function () { clearVideo(); startRecording(); });
+  els.removeVideoBtn.addEventListener('click', clearVideo);
+  els.stopRecBtn.addEventListener('click', function () {
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+  });
+  els.cancelRecBtn.addEventListener('click', cancelRecording);
+  els.pickVideoLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    els.videoFileInput.click();
+  });
+  els.videoFileInput.addEventListener('change', function () {
+    var f = els.videoFileInput.files[0];
+    els.videoFileInput.value = '';
+    if (!f) return;
+    if (f.size > MAX_VIDEO_MB * 1024 * 1024) {
+      showError('Cette vidéo dépasse ' + MAX_VIDEO_MB + ' Mo — pouvez-vous en choisir une plus courte ?');
+      return;
+    }
+    showError('');
+    setVideo(f, f.type || 'video/mp4');
+  });
+
+  function startRecording() {
+    showError('');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      showError('L\'enregistrement vidéo n\'est pas disponible sur ce navigateur — vous pouvez ' +
+                'choisir une vidéo déjà enregistrée à la place.');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true }).then(function (stream) {
+      recStream = stream;
+      els.liveVideo.srcObject = stream;
+      showVideoPanel('videoLive');
+      var mime = ['video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm']
+        .filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0];
+      recChunks = [];
+      recorder = new MediaRecorder(stream, mime
+        ? { mimeType: mime, videoBitsPerSecond: 1500000, audioBitsPerSecond: 128000 }
+        : undefined);
+      recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
+      recorder.onstop = function () {
+        stopStream();
+        var type = (recorder.mimeType || mime || 'video/webm').split(';')[0];
+        if (recChunks.length) setVideo(new Blob(recChunks, { type: type }), type);
+        else showVideoPanel('videoIdle');
+      };
+      recorder.start();
+      recStart = Date.now();
+      els.recTimer.textContent = '● 0:00';
+      recTimerInt = setInterval(updateRecTimer, 250);
+    }).catch(function () {
+      showError('Impossible d\'accéder à la caméra ou au micro — autorisez l\'accès dans votre ' +
+                'navigateur, ou choisissez une vidéo déjà enregistrée.');
+    });
+  }
+
+  function updateRecTimer() {
+    var s = Math.floor((Date.now() - recStart) / 1000);
+    els.recTimer.textContent = '● ' + Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+    if (s >= MAX_VIDEO_SECONDS && recorder && recorder.state === 'recording') recorder.stop();
+  }
+
+  function stopStream() {
+    clearInterval(recTimerInt);
+    if (recStream) {
+      recStream.getTracks().forEach(function (t) { t.stop(); });
+      recStream = null;
+    }
+    els.liveVideo.srcObject = null;
+  }
+
+  function cancelRecording() {
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = null;
+      recorder.stop();
+    }
+    recChunks = [];
+    stopStream();
+    showVideoPanel('videoIdle');
+  }
+
+  function setVideo(blob, mimeType) {
+    videoState = { blob: blob, mimeType: mimeType, uploaded: false };
+    els.doneVideo.src = URL.createObjectURL(blob);
+    showVideoPanel('videoDone');
+  }
+
+  function clearVideo() {
+    if (els.doneVideo.src) {
+      URL.revokeObjectURL(els.doneVideo.src);
+      els.doneVideo.removeAttribute('src');
+    }
+    videoState = { blob: null, mimeType: '', uploaded: false };
+    showVideoPanel('videoIdle');
+  }
+
+  function showVideoPanel(id) {
+    ['videoIdle', 'videoLive', 'videoDone'].forEach(function (v) { els[v].hidden = (v !== id); });
+  }
+
+  /* ---- submit flow ---- */
+  var submitting = false;
+
+  els.submit.addEventListener('click', function () {
+    if (submitting) return;
+    showError('');
+    var name = els.name.value.trim();
+    if (!name) { showError('Dites-nous d\'abord votre prénom.'); els.name.focus(); return; }
+    if (recorder && recorder.state === 'recording') {
+      showError('Terminez d\'abord votre enregistrement vidéo (bouton « Terminer »).');
+      return;
+    }
+    if (picked.length === 0 && !els.message.value.trim() && !videoState.blob) {
+      showError('Ajoutez une photo, un petit mot ou une vidéo — ce que vous préférez !');
+      return;
+    }
+    submitting = true;
+    startUpload(name);
+  });
+
+  function startUpload(name) {
+    showView('progressView');
+    var toUpload = picked.filter(function (p) { return !p.uploaded; });
+    var videoPending = !!(videoState.blob && !videoState.uploaded);
+    var videoChunkCount = videoPending
+      ? Math.max(1, Math.ceil((videoState.blob.size * 4 / 3) / CHUNK_CHARS))
+      : 0;
+    var doneUnits = picked.length - toUpload.length;
+    var totalUnits = picked.length + videoChunkCount;
+    var photoNo = doneUnits;
+
+    var chain = Promise.resolve();
+    toUpload.forEach(function (p) {
+      chain = chain.then(function () {
+        photoNo++;
+        setProgress(doneUnits, totalUnits, 'Envoi de la photo ' + photoNo + ' sur ' + picked.length + '…');
+        return readAsBase64(p.file).then(function (b64) {
+          return callWithRetry('uploadFile', {
+            contributorName: name,
+            index: picked.indexOf(p) + 1,
+            fileName: p.file.name,
+            mimeType: p.file.type,
+            data: b64
+          });
+        }).then(function () {
+          p.uploaded = true;
+          doneUnits++;
+          setProgress(doneUnits, totalUnits, '');
+        });
+      });
+    });
+
+    if (videoPending) {
+      chain = chain.then(function () {
+        setProgress(doneUnits, totalUnits, 'Préparation de la vidéo…');
+        return readAsBase64(videoState.blob);
+      }).then(function (b64) {
+        var chunks = [];
+        for (var i = 0; i < b64.length; i += CHUNK_CHARS) chunks.push(b64.slice(i, i + CHUNK_CHARS));
+        var uploadId = 'v' + Math.random().toString(36).slice(2, 10);
+        var ext = videoState.mimeType.indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+        var seq = Promise.resolve();
+        chunks.forEach(function (chunk, idx) {
+          seq = seq.then(function () {
+            setProgress(doneUnits, totalUnits,
+                        'Envoi de la vidéo… ' + Math.round((idx / chunks.length) * 100) + ' %');
+            return callWithRetry('uploadVideoChunk', {
+              contributorName: name,
+              uploadId: uploadId,
+              seq: idx,
+              isLast: idx === chunks.length - 1,
+              mimeType: videoState.mimeType,
+              fileName: 'message.' + ext,
+              data: chunk
+            }).then(function () {
+              doneUnits++;
+              setProgress(doneUnits, totalUnits, '');
+            });
+          });
+        });
+        return seq.then(function () { videoState.uploaded = true; });
+      });
+    }
+
+    chain.then(function () {
+      setProgress(totalUnits, totalUnits || 1, 'Enregistrement de votre message…');
+      return callWithRetry('finalizeSubmission', {
+        contributorName: name,
+        message: els.message.value,
+        fileCount: picked.length,
+        hasVideo: videoState.uploaded || !!videoState.blob
+      });
+    }).then(function () {
+      submitting = false;
+      els.thanksName.textContent = name ? ', ' + name : '';
+      showView('thanksView');
+    }).catch(function () {
+      submitting = false;
+      showView('formView');
+      showError('Une erreur est survenue pendant l\'envoi — vérifiez votre connexion puis touchez ' +
+                'à nouveau « Envoyer avec amour ». Ce qui a déjà été envoyé ne sera pas envoyé deux fois.');
+    });
+  }
+
+  function setProgress(done, total, label) {
+    var pct = total ? Math.round((done / total) * 100) : 100;
+    els.fill.style.width = pct + '%';
+    if (label) els.progressLabel.textContent = label;
+  }
+
+  function showView(id) {
+    ['formView', 'progressView', 'thanksView'].forEach(function (v) {
+      els[v].style.display = (v === id) ? 'block' : 'none';
+    });
+    window.scrollTo(0, 0);
+  }
+  els.formView.style.display = 'block';
+
+  els.again.addEventListener('click', function () {
+    picked = [];
+    renderThumbs();
+    els.message.value = '';
+    clearVideo();
+    els.fill.style.width = '0%';
+    showView('formView');
+  });
+
+  /* ---- helpers ---- */
+  function readAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1]); };
+      r.onerror = function () { reject(r.error); };
+      r.readAsDataURL(file);
+    });
+  }
+
+  function callServer(fn, payload) {
+    if (!APPS_SCRIPT_URL) {
+      if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        // Local preview mode (no backend): pretend it worked.
+        return new Promise(function (resolve) {
+          setTimeout(function () { resolve({ ok: true }); }, 700);
+        });
+      }
+      return Promise.reject(new Error('Backend non configuré'));
+    }
+    // text/plain keeps the request "simple" (no CORS preflight, which
+    // Apps Script web apps don't answer).
+    return fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: fn, payload: payload })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (res) {
+      if (!res || !res.ok) throw new Error((res && res.error) || 'Erreur serveur');
+      return res;
+    });
+  }
+
+  // Live site with no backend configured yet: make that visible instead of
+  // letting submissions silently go nowhere.
+  if (!APPS_SCRIPT_URL && location.protocol !== 'file:' &&
+      location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    els.submit.disabled = true;
+    showError('Le site est encore en préparation — les envois ouvriront très bientôt. Revenez un peu plus tard !');
+  }
+
+  function callWithRetry(fn, payload, attempt) {
+    attempt = attempt || 1;
+    return callServer(fn, payload).catch(function (err) {
+      if (attempt >= 3) throw err;
+      return new Promise(function (res) { setTimeout(res, attempt * 1500); })
+        .then(function () { return callWithRetry(fn, payload, attempt + 1); });
+    });
+  }
+</script>
+</body>
+</html>
